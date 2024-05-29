@@ -11,17 +11,9 @@
  * @param {(page: number) => void} onPageChange 页码变化的回调函数
  */
 
-import { FC } from "react";
-
-interface PaginationProps {
-  current: number;
-  total: number;
-  per: number;
-  type: "js" | "link";
-  ext: string;
-  mode: string;
-  onPageChange: (page: number) => void;
-}
+import { FC, ReactNode } from "react";
+import type { PaginationProps } from "@types";
+import { LeftIcon, RightIcon } from "@components/buttons";
 
 const Pagination: FC<PaginationProps> = ({
   current,
@@ -36,7 +28,7 @@ const Pagination: FC<PaginationProps> = ({
   const l = ext.split("###");
 
   const createButton = (
-    text: string,
+    text: ReactNode,
     page: number,
     disabled: boolean
   ): JSX.Element => (
@@ -75,8 +67,7 @@ const Pagination: FC<PaginationProps> = ({
       return [
         ...Array.from({ length: 10 }, (_, i) => createLink(i + 1, current)),
         <span key="dots1" className="px-4 py-2 mx-1">
-          {" "}
-          ...{" "}
+          {` ... `}
         </span>,
         createLink(totalPage, current),
       ];
@@ -84,8 +75,7 @@ const Pagination: FC<PaginationProps> = ({
       return [
         createLink(1, current),
         <span key="dots2" className="px-4 py-2 mx-1">
-          {" "}
-          ...{" "}
+          {` ... `}
         </span>,
         ...Array.from({ length: 10 }, (_, i) =>
           createLink(totalPage - 10 + i + 1, current)
@@ -96,15 +86,13 @@ const Pagination: FC<PaginationProps> = ({
         createLink(1, current),
         createLink(2, current),
         <span key="dots3" className="px-4 py-2 mx-1">
-          {" "}
-          ...{" "}
+          {` ... `}
         </span>,
         ...Array.from({ length: 7 }, (_, i) =>
           createLink(current - 3 + i, current)
         ),
         <span key="dots4" className="px-4 py-2 mx-1">
-          {" "}
-          ...{" "}
+          {` ... `}
         </span>,
         createLink(totalPage - 1, current),
         createLink(totalPage, current),
@@ -114,10 +102,10 @@ const Pagination: FC<PaginationProps> = ({
 
   const createForm = (): JSX.Element => (
     <span className="flex items-center space-x-2">
-      <span>到第</span>
+      <span>To</span>
       <input
         type="text"
-        className="w-20 px-2 py-1 border rounded-lg text-center"
+        className="w-auto px-2 py-1 border rounded-lg text-center"
         value={current}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -128,7 +116,7 @@ const Pagination: FC<PaginationProps> = ({
           }
         }}
       />
-      <span>页</span>
+      <span>Page</span>
       <button
         className="px-4 py-2 border rounded-lg bg-green-500 text-white"
         onClick={() => {
@@ -140,7 +128,7 @@ const Pagination: FC<PaginationProps> = ({
           }
         }}
       >
-        确定
+        Go
       </button>
     </span>
   );
@@ -148,9 +136,9 @@ const Pagination: FC<PaginationProps> = ({
   const navElements = mode.split("").map((e, index) => {
     switch (e) {
       case "<":
-        return createButton("上一页", current - 1, current === 1);
+        return createButton(<LeftIcon />, current - 1, current === 1);
       case ">":
-        return createButton("下一页", current + 1, current === totalPage);
+        return createButton(<RightIcon />, current + 1, current === totalPage);
       case "*":
         return (
           <span key={index} className="flex space-x-1">
