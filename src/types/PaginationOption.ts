@@ -1,17 +1,22 @@
+import { Dispatch, SetStateAction } from "react";
+
 interface ButtonClass {
   base: string;
   disabled?: string;
   active?: string;
   hover?: string;
 }
+
 interface TextClass {
   base: string;
 }
+
 interface InputClass {
   base: string;
   active?: string;
   hover?: string;
 }
+
 interface IconClass {
   fill?: string;
   width?: string;
@@ -28,13 +33,13 @@ interface OptionClassNames {
   icon?: IconClass;
 }
 
+export interface PageChangeEvent<T> extends Dispatch<SetStateAction<T>> {}
+
 export interface PaginationProps {
   current: number;
   total: number;
-  per: number;
-  type: "js" | "link";
-  ext: string;
+  pageSetup: number;
   mode: string;
-  onPageChange: (page: number) => void;
+  onPageChange: PageChangeEvent<number>;
   classNames?: OptionClassNames;
 }

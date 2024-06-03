@@ -1,31 +1,40 @@
 /**
  * 分页组件 Pagination
  *
- * @author Jun Wu
  * @param {number} current 当前页
  * @param {number} total 结果总数
- * @param {number} per 每页显示数
- * @param {'js' | 'link'} type 链接类型。js为javascript，link为普通超链接
- * @param {string} ext 链接字串。如'?type=abc&p='则输出“?type=abc&p=页码”的链接
+ * @param {number} pageSetup 每页显示数
  * @param {string} mode 输出格式(可重复)。<表示“上一页”，>表示下一页，*表示页码区，=表示跳转区。
- * @param {(page: number) => void} onPageChange 页码变化的回调函数
+ * @param {PageChangeEvent<number>} onPageChange 页码变化的回调函数
  */
 
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import type { PaginationProps } from "@types";
-import { LeftIcon, RightIcon } from "@components/buttons";
+import { DotsHorizontalIcon, LeftIcon, RightIcon } from "@components/buttons";
 
 const Pagination: FC<PaginationProps> = ({
   current,
   total,
-  per,
-  type,
-  ext,
+  pageSetup,
   mode,
   onPageChange,
 }) => {
-  const totalPage = Math.ceil(total / per);
-  const l = ext.split("###");
+  const totalPage = Math.ceil(total / pageSetup);
+  const [inputValue, setInputValue] = useState(current);
+
+  useEffect(() => {
+    setInputValue(current);
+  }, [current]);
+
+  const handlePageChange = (newValue: number) => {
+    if (newValue < 1) {
+      onPageChange(1);
+    } else if (newValue > totalPage) {
+      onPageChange(totalPage);
+    } else {
+      onPageChange(newValue);
+    }
+  };
 
   const createButton = (
     text: ReactNode,
@@ -37,7 +46,7 @@ const Pagination: FC<PaginationProps> = ({
         disabled ? "bg-gray-300 cursor-not-allowed" : "bg-blue-500 text-white"
       }`}
       disabled={disabled}
-      onClick={() => onPageChange(page)}
+      onClick={() => handlePageChange(page)}
     >
       {text}
     </button>
@@ -45,13 +54,13 @@ const Pagination: FC<PaginationProps> = ({
 
   const createLink = (page: number, currentPage: number): JSX.Element => (
     <a
-      href={`${l[0]}${page}${l[1] ?? ""}`}
+      href={`#`}
       className={`px-4 py-2 mx-1 ${
         page === currentPage ? "font-bold text-blue-500" : "text-gray-500"
       }`}
       onClick={(e) => {
         e.preventDefault();
-        onPageChange(page);
+        handlePageChange(page);
       }}
     >
       {page}
@@ -66,17 +75,19 @@ const Pagination: FC<PaginationProps> = ({
     } else if (current < 10) {
       return [
         ...Array.from({ length: 10 }, (_, i) => createLink(i + 1, current)),
-        <span key="dots1" className="px-4 py-2 mx-1">
-          {` ... `}
-        </span>,
+        <DotsHorizontalIcon
+          key="dots1"
+          className="mx-1 my-auto w-4 h-3 fill-gray-500"
+        />,
         createLink(totalPage, current),
       ];
     } else if (totalPage - current < 10) {
       return [
         createLink(1, current),
-        <span key="dots2" className="px-4 py-2 mx-1">
-          {` ... `}
-        </span>,
+        <DotsHorizontalIcon
+          key="dots2"
+          className="mx-1 my-auto w-4 h-3 fill-gray-500"
+        />,
         ...Array.from({ length: 10 }, (_, i) =>
           createLink(totalPage - 10 + i + 1, current)
         ),
@@ -85,15 +96,17 @@ const Pagination: FC<PaginationProps> = ({
       return [
         createLink(1, current),
         createLink(2, current),
-        <span key="dots3" className="px-4 py-2 mx-1">
-          {` ... `}
-        </span>,
+        <DotsHorizontalIcon
+          key="dots3"
+          className="mx-1 my-auto w-4 h-3 fill-gray-500"
+        />,
         ...Array.from({ length: 7 }, (_, i) =>
           createLink(current - 3 + i, current)
         ),
-        <span key="dots4" className="px-4 py-2 mx-1">
-          {` ... `}
-        </span>,
+        <DotsHorizontalIcon
+          key="dots4"
+          className="mx-1 my-auto w-4 h-3 fill-gray-500"
+        />,
         createLink(totalPage - 1, current),
         createLink(totalPage, current),
       ];
@@ -106,27 +119,18 @@ const Pagination: FC<PaginationProps> = ({
       <input
         type="text"
         className="w-auto px-2 py-1 border rounded-lg text-center"
-        value={current}
+        value={inputValue}
+        onChange={(e) => setInputValue(Number(e.target.value))}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
-            const inputValue = parseInt((e.target as HTMLInputElement).value);
-            if (!isNaN(inputValue)) {
-              onPageChange(inputValue);
-            }
+            handlePageChange(inputValue);
           }
         }}
       />
       <span>Page</span>
       <button
         className="px-4 py-2 border rounded-lg bg-green-500 text-white"
-        onClick={() => {
-          const inputValue = parseInt(
-            (document.querySelector("input") as HTMLInputElement).value
-          );
-          if (!isNaN(inputValue)) {
-            onPageChange(inputValue);
-          }
-        }}
+        onClick={() => handlePageChange(inputValue)}
       >
         Go
       </button>
